@@ -1,0 +1,118 @@
+.shop-product-list .card {
+    border: none;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.07);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 14px;
+    background: #fff;
+    overflow: hidden;
+    min-height: 340px;
+    padding-bottom: 12px;
+  }
+  
+  .shop-product-list .card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 6px 18px 0 rgba(226,163,85,0.13);
+  }
+  
+  .shop-product-list .card img {
+    object-fit: contain;
+    width: 100%;
+    height: 120px;
+    border-radius: 14px 14px 0 0;
+    background: #f8f8f8;
+    margin-bottom: 8px;
+  }
+  
+  .shop-product-list .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    min-height: 40px;
+    margin-bottom: 4px;
+  }
+  
+  .shop-product-list .rating {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+  
+  .shop-product-list .btn-cart {
+    background: #e2a355;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 7px 0;
+    width: 100%;
+    margin-bottom: 6px;
+    transition: background 0.2s;
+  }
+  
+  .shop-product-list .btn-cart:hover {
+    background: #d18c3b;
+  }
+  
+  .shop-product-list .btn-wishlist {
+    background: #fff;
+    border: 1px solid #e2a355;
+    color: #e2a355;
+    border-radius: 7px;
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+  }
+  
+  .shop-product-list .btn-wishlist:hover {
+    background: #e2a355;
+    color: #fff;
+  }
+  
+  .shop-product-list .card .position-absolute {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e2a355;
+    background: #fffbe6 !important;
+    border: 1px solid #e2a355 !important;
+    padding: 2px 10px !important;
+  }
+  
+  .shop-product-list .card-body {
+    padding: 0 10px;
+  }
+  
+  .shop-product-list .card-text h3 {
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+  }
+  
+  .shop-product-list .card-text span {
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 992px) {
+    .shop-product-list .card img {
+      height: 90px;
+    }
+    .shop-product-list .card-title {
+      font-size: 0.95rem;
+      min-height: 32px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .shop-product-list .card {
+      min-height: 260px;
+      padding-bottom: 6px;
+    }
+    .shop-product-list .card img {
+      height: 70px;
+    }
+  }

@@ -1,0 +1,56 @@
+/* serviceHome.css */
+#service {
+  background: #fff;
+}
+#service .card {
+  border: none;
+  background: #fff;
+  box-shadow: none;
+  text-align: center;
+  padding: 0 8px 0 8px;
+}
+#service .service-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1.5px solid #e0e0e0;
+  font-size: 2.5rem;
+  color: #e2a355 !important;
+  margin: 0 auto 18px auto;
+  background: #fff;
+  transition: box-shadow 0.2s;
+}
+#service .card-title {
+  font-family: 'Indie Flower', cursive;
+  font-size: 2rem;
+  font-weight: 500;
+  color: #222;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+#service .card-text {
+  color: #a6a29e;
+  font-size: 1.1rem;
+  margin-bottom: 0;
+}
+#service .blog-paragraph {
+  color: #a6a29e;
+  font-size: 1.1rem;
+  margin-bottom: 0;
+}
+@media (max-width: 900px) {
+  #service .service-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 1.5rem;
+  }
+  #service .card-title {
+    font-size: 1.2rem;
+  }
+  #service .card-text, #service .blog-paragraph {
+    font-size: 0.95rem;
+  }
+} 

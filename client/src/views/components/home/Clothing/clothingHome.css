@@ -1,0 +1,105 @@
+/* clothingHome.css */
+#clothing .card {
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    border: none;
+    overflow: hidden;
+    background: #fff;
+    transition: box-shadow 0.2s;
+  }
+  
+  #clothing .card:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+  
+  #clothing .img-fluid {
+    border-radius: 24px 24px 0 0;
+    object-fit: cover;
+    width: 100%;
+    height: 260px;
+  }
+  
+  #clothing .z-1.position-absolute {
+    top: 16px;
+    left: 16px;
+    background: #f5f5f5;
+    color: #333;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 12px;
+    padding: 4px 16px;
+    border: 1px solid #e0e0e0;
+    z-index: 2;
+  }
+  
+  #clothing .card-title {
+    font-size: 1.7rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    color: black
+  }
+  
+  #clothing .rating {
+    color: #ffb400;
+    font-size: 1.2rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  
+  #clothing .rating .text-primary {
+    color: #ffb400 !important;
+    font-size: 1.2rem;
+  }
+  
+  #clothing .secondary-font.text-primary {
+    color: #e2a355 !important;
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0.5rem 0;
+  }
+  
+  #clothing .btn-cart {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background: #fff;
+    color: #222;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 12px 32px;
+    text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+  }
+  
+  #clothing .btn-cart:hover {
+    background: #e2a355;
+    color: #fff;
+    border-color: #e2a355;
+  }
+  
+  #clothing .btn-wishlist {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background: #fff;
+    color: #e2a355;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+  }
+  
+  #clothing .btn-wishlist:hover {
+    background: #e2a355;
+    color: #fff;
+  }
+  
+  #clothing .swiper-slide {
+    margin-right: 30px !important;
+  }
+  
+  #clothing .d-flex.flex-wrap.mt-3 {
+    gap: 8px;
+  }

@@ -1,0 +1,137 @@
+.sidebar-container {
+    background: #fff;
+    padding: 0 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-bottom: 1.5px solid #f4a26122;
+}
+
+.nav-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 70px;
+}
+
+.category-select .ant-select-selector {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    font-weight: 600;
+    font-size: 16px;
+    color: #f4a261;
+}
+
+.main-menu {
+    flex: 1;
+    margin-left: 30px;
+    background: transparent !important;
+    border-bottom: none !important;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+.main-menu .ant-menu-item,
+.main-menu .ant-menu-submenu-title {
+    color: #444 !important;
+    margin: 0 14px;
+    font-weight: 600;
+    background: transparent !important;
+    transition: color 0.2s, background 0.2s;
+    padding: 0 8px;
+    border-radius: 6px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    border: none !important;
+    box-sizing: border-box;
+}
+
+.main-menu .ant-menu-item a,
+.main-menu .ant-menu-submenu-title {
+    color: #444 !important;
+}
+
+.main-menu .ant-menu-item:hover,
+.main-menu .ant-menu-item-active,
+.main-menu .ant-menu-item-selected,
+.main-menu .ant-menu-submenu-title:hover {
+    color: #e07a5f !important;
+    background: #f4a26122 !important;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.user-actions .ant-btn {
+    color: #444;
+    font-size: 20px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    position: relative;
+    transition: color 0.2s;
+}
+
+.user-actions .ant-btn:hover {
+    color: #f4a261;
+    background: #f4a26122;
+}
+
+.login-button {
+    display: flex !important;
+    align-items: center !important;
+    background: linear-gradient(90deg, #f4a261 60%, #e07a5f 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 7px 22px !important;
+    border-radius: 25px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    margin-right: 8px !important;
+    box-shadow: 0 2px 8px #f4a26133 !important;
+    transition: background 0.2s, box-shadow 0.2s !important;
+    gap: 8px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 10 !important;
+}
+
+.login-button:hover {
+    background: linear-gradient(90deg, #e07a5f 60%, #f4a261 100%) !important;
+    box-shadow: 0 4px 16px #e07a5f33 !important;
+    color: #fff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.cart-button {
+    position: relative;
+}
+
+.cart-button .badge {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    background: #e07a5f;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 1px 4px #e07a5f33;
+    border: 2px solid #fff;
+    min-width: 22px;
+    text-align: center;
+}
+
+.main-menu a, .main-menu .ant-menu-item a, .main-menu .ant-menu-submenu-title a, .main-menu .ant-menu-item .ant-menu-title-content a, .main-menu .ant-menu-submenu-title .ant-menu-title-content a, .user-actions a, .user-actions .ant-btn a {
+    text-decoration: none !important;
+    box-shadow: none !important;
+}
