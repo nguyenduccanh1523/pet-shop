@@ -1,4 +1,6 @@
 import React from "react";
+import Login from "../views/auth/login";
+import Register from "../views/auth/register";
 
 // import SignIn from "../views/dashboard/auth/sign-in";
 // import SignUp from "../views/dashboard/auth/sign-up";
@@ -17,14 +19,14 @@ import React from "react";
 export const SimpleRouter = [
 
 
-//   {
-//     path: "/sign-in",
-//     element: <SignIn />,
-//   },
-//   {
-//     path: "/sign-up",
-//     element: <SignUp />,
-//   },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
 //   {
 //     path: "/forgot-password",
 //     element: <ForgotPassword />
