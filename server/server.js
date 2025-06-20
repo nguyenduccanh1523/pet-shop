@@ -2,7 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv';
 dotenv.config();
 import cors from 'cors'
-// import initRoutes from './src/routes/index.js'
+import initRoutes from './src/routes/index.js'
 import connectDatabase from './src/config/connectDatabase.js';
 import http from 'http' // 👈 Thêm dòng này
 import { Server } from 'socket.io' // 👈 Thêm dòng này
@@ -64,7 +64,7 @@ const server = http.createServer(app); // 👈 Tạo server từ http
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// initRoutes(app)
+initRoutes(app)
 connectDatabase()
 
 app.get('/', (req, res) => {
