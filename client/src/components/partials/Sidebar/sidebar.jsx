@@ -10,7 +10,7 @@ const { Option } = Select;
 const Sidebar = () => {
     const menuItems = [
         { key: '1', label: 'About Us', href: '/' },
-        { key: '2', label: 'Shop', href: '/' },
+        { key: '2', label: 'Shop', href: '/shop' },
         { key: '3', label: 'Single Product', href: '/' },
         { key: '4', label: 'Cart', href: '/' },
         { key: '5', label: 'Wishlist', href: '/' },
@@ -43,7 +43,7 @@ const Sidebar = () => {
         },
         {
             key: 'shop',
-            label: <Link to="/">Shop</Link>,
+            label: <Link to="/shop">Shop</Link>,
         },
         {
             key: 'blog',

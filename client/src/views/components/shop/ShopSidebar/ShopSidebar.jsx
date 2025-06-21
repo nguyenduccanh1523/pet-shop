@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { apiGetProductCategory } from "../../../../services/product/productCategory";
 
 const ArrowIcon = ({ open }) => (
   <span style={{
@@ -7,34 +10,11 @@ const ArrowIcon = ({ open }) => (
     transform: open ? "rotate(90deg)" : "rotate(0deg)",
     marginLeft: 8,
     fontSize: 13,
-    color: '#888'
+    color: '#e2a355'
   }}>
     ▶
   </span>
 );
-
-const categories = [
-  { key: "new", label: "Sản Phẩm Mới" },
-  {
-    key: "dog",
-    label: "Dành cho chó",
-    children: [
-      { key: "dog-food", label: "Thức Ăn Chó" },
-      { key: "dog-nutrition", label: "Bổ sung dinh dưỡng" },
-      { key: "dog-toy", label: "Đồ chơi, Huấn luyện" },
-      { key: "dog-accessory", label: "Đồ dùng cho chó" }
-    ]
-  },
-  { key: "cat", label: "Dành cho mèo" },
-  { key: "accessory", label: "Dây dắt, phụ kiện" },
-  { key: "clothes", label: "Quần áo" },
-  { key: "bowl", label: "Bát bình chứa đựng" },
-  { key: "transport", label: "Đồ vận chuyển, nuôi nhốt" },
-  { key: "bath", label: "Sữa tắm, Khử mùi" },
-  { key: "care", label: "Hỗ trợ chăm sóc" },
-  { key: "nutrition", label: "Bổ sung dinh dưỡng" },
-  { key: "vet", label: "Thú Y" }
-];
 
 const priceRanges = [
   "Dưới 50.000đ-100.000đ",
@@ -57,11 +37,44 @@ const sidebarStyle = {
 
 const ShopSidebar = ({ onCategoryClick, onClose }) => {
   const [openKeys, setOpenKeys] = useState([]);
+  const navigate = useNavigate();
 
-  const handleToggle = (key) => {
-    setOpenKeys((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
+  const { data: productCategory, isLoading: isproductCategoryLoading } = useQuery({
+    queryKey: ['productCategory'],
+    queryFn: () => apiGetProductCategory({ populate: true }).then(res => res.data),
+  });
+
+
+  const handleToggle = (categoryId) => {
+    setOpenKeys((prev) => {
+      const isOpen = prev.includes(categoryId);
+      if (isOpen) {
+        // Đóng danh mục
+        return prev.filter((k) => k !== categoryId);
+      } else {
+        // Mở danh mục
+        return [...prev, categoryId];
+      }
+    });
+  };
+
+  // Kiểm tra xem danh mục có con hay không
+  const hasChildren = (category) => {
+    return category.children && category.children.length > 0;
+  };
+
+  // Xử lý click vào category
+  const handleCategoryClick = (category) => {
+    // Tạo slug từ tên category
+    const slug = category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    
+    // Navigate đến trang category
+    navigate(`/shop/${slug}`);
+    
+    // Gọi callback nếu có
+    if (onCategoryClick) {
+      onCategoryClick(category);
+    }
   };
 
   return (
@@ -77,75 +90,85 @@ const ShopSidebar = ({ onCategoryClick, onClose }) => {
         <h6 className="fw-bold mb-0" style={{ textTransform: 'uppercase', fontSize: 16, letterSpacing: 1, color: '#e2a355' }}>Danh mục sản phẩm</h6>
         <button className="btn btn-sm" onClick={onClose} style={{ borderRadius: '50%', background: '#f5f5f5', width: 28, height: 28, padding: 0, fontSize: 16, lineHeight: '28px', color: '#888', border: 'none' }}>✕</button>
       </div>
-      <ul className="list-unstyled mb-4" style={{ paddingLeft: 0 }}>
-        {categories.map((cat) => (
-          <li
-            key={cat.key}
-            className="mb-1"
-            style={{
-              borderRadius: 8,
-              background: openKeys.includes(cat.key) ? "#fff7ea" : "transparent",
-              transition: "background 0.2s"
-            }}
-          >
-            <div
-              onClick={() => cat.children ? handleToggle(cat.key) : onCategoryClick(cat.key)}
+      
+      {isproductCategoryLoading ? (
+        <div className="text-center py-4">
+          <div className="spinner-border text-warning" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      ) : (
+        <ul className="list-unstyled mb-4" style={{ paddingLeft: 0 }}>
+          {productCategory?.data?.map((cat) => (
+            <li
+              key={cat._id}
+              className="mb-1"
               style={{
-                fontWeight: cat.children ? 600 : 400,
-                color: cat.children ? "#e2a355" : "#222",
-                padding: "10px 14px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
                 borderRadius: 8,
-                userSelect: "none",
-                fontSize: 15,
-                boxShadow: openKeys.includes(cat.key) ? '0 2px 8px #fbe6c2' : 'none',
-                outline: 'none',
-                transition: 'box-shadow 0.2s, background 0.2s'
+                background: openKeys.includes(cat._id) ? "#fff7ea" : "transparent",
+                transition: "background 0.2s"
               }}
-              className="sidebar-category-item"
-              tabIndex={0}
-              onKeyDown={e => {
-                if (e.key === "Enter" || e.key === " ") {
-                  cat.children ? handleToggle(cat.key) : onCategoryClick(cat.key);
-                }
-              }}
-              onMouseOver={e => e.currentTarget.style.background = "#fff3e0"}
-              onMouseOut={e => e.currentTarget.style.background = openKeys.includes(cat.key) ? "#fff7ea" : "transparent"}
             >
-              <span>{cat.label}</span>
-              {cat.children && <ArrowIcon open={openKeys.includes(cat.key)} />}
-            </div>
-            {cat.children && openKeys.includes(cat.key) && (
-              <ul className="list-unstyled ms-2 mt-1 mb-2" style={{ paddingLeft: 10 }}>
-                {cat.children.map((child) => (
-                  <li
-                    key={child.key}
-                    style={{
-                      cursor: 'pointer',
-                      fontWeight: 400,
-                      color: "#444",
-                      padding: "7px 18px",
-                      borderRadius: 6,
-                      marginBottom: 2,
-                      fontSize: 14,
-                      transition: "background 0.15s"
-                    }}
-                    className="sidebar-category-child"
-                    onClick={() => onCategoryClick(child.key)}
-                    onMouseOver={e => e.currentTarget.style.background = "#fbe6c2"}
-                    onMouseOut={e => e.currentTarget.style.background = "transparent"}
-                  >
-                    • {child.label}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
+              <div
+                onClick={() => hasChildren(cat) ? handleToggle(cat._id) : handleCategoryClick(cat)}
+                style={{
+                  fontWeight: hasChildren(cat) ? 600 : 400,
+                  color: hasChildren(cat) ? "#e2a355" : "#222",
+                  padding: "10px 14px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  borderRadius: 8,
+                  userSelect: "none",
+                  fontSize: 15,
+                  boxShadow: openKeys.includes(cat._id) ? '0 2px 8px #fbe6c2' : 'none',
+                  outline: 'none',
+                  transition: 'box-shadow 0.2s, background 0.2s'
+                }}
+                className="sidebar-category-item"
+                tabIndex={0}
+                onKeyDown={e => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    hasChildren(cat) ? handleToggle(cat._id) : handleCategoryClick(cat);
+                  }
+                }}
+                onMouseOver={e => e.currentTarget.style.background = "#fff3e0"}
+                onMouseOut={e => e.currentTarget.style.background = openKeys.includes(cat._id) ? "#fff7ea" : "transparent"}
+              >
+                <span>{cat.name}</span>
+                {hasChildren(cat) && <ArrowIcon open={openKeys.includes(cat._id)} />}
+              </div>
+              {hasChildren(cat) && openKeys.includes(cat._id) && (
+                <ul className="list-unstyled ms-2 mt-1 mb-2" style={{ paddingLeft: 10 }}>
+                  {cat.children.map((child) => (
+                    <li
+                      key={child._id}
+                      style={{
+                        cursor: 'pointer',
+                        fontWeight: 400,
+                        color: "#444",
+                        padding: "7px 18px",
+                        borderRadius: 6,
+                        marginBottom: 2,
+                        fontSize: 14,
+                        transition: "background 0.15s"
+                      }}
+                      className="sidebar-category-child"
+                      onClick={() => handleCategoryClick(child)}
+                      onMouseOver={e => e.currentTarget.style.background = "#fbe6c2"}
+                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                    >
+                      • {child.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      
       <h6 className="fw-bold mb-2" style={{ textTransform: 'uppercase', fontSize: 15, letterSpacing: 1, color: '#e2a355' }}>Giá sản phẩm</h6>
       <ul className="list-unstyled" style={{ paddingLeft: 0 }}>
         {priceRanges.map((pr, idx) => (

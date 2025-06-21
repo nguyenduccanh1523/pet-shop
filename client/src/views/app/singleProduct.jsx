@@ -1,25 +1,46 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import Review from "../components/products/Review/review";
 import Product from "../components/products/Product/product";
 
 
 const SingleProduct = () => {
+    const [productData, setProductData] = useState(null);
+
+    const handleProductData = (data) => {
+        setProductData(data);
+    };
+
     return (
         <div className="container py-4">
             {/* Breadcrumb */}
             <div className="mb-3">
                 <nav aria-label="breadcrumb">
                     <ol className="breadcrumb mb-0" style={{ background: "none" }}>
-                        <li className="breadcrumb-item"><a href="/">Trang chủ</a></li>
-                        <li className="breadcrumb-item"><a href="#">Thức ăn dành cho chó</a></li>
+                        <li className="breadcrumb-item">
+                            <Link to="/" style={{ textDecoration: 'none', color: '#666' }}>Trang chủ</Link>
+                        </li>
+                        <li className="breadcrumb-item">
+                            <Link to="/shop" style={{ textDecoration: 'none', color: '#666' }}>Cửa hàng</Link>
+                        </li>
+                        {productData?.category && (
+                            <li className="breadcrumb-item">
+                                <Link 
+                                    to={`/shop/${productData.category.slug}`} 
+                                    style={{ textDecoration: 'none', color: '#666' }}
+                                >
+                                    {productData.category.name}
+                                </Link>
+                            </li>
+                        )}
                         <li className="breadcrumb-item active" aria-current="page" style={{ color: "#e2a355" }}>
-                            Hạt mềm cho chó Nutri Plan Softmune 200g
+                            {productData?.name || "Đang tải..."}
                         </li>
                     </ol>
                 </nav>
             </div>
             {/* Thông tin sản phẩm */}
-            <Product />
+            <Product onProductData={handleProductData} />
             {/* Thông tin dịch vụ bên phải (nếu muốn tách riêng, có thể tạo component ServiceInfo) */}
             <div className="row mt-4">
                 <div className="col-md-8">

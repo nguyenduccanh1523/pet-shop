@@ -3,24 +3,16 @@ import * as productCategoryService from '../../services/product/productCategory.
 export const getAllCategories = async (req, res) => {
     try {
         // Đọc phân trang dạng pagination[page], pagination[pageSize]
-        const page = parseInt(req.query.pagination?.page) || parseInt(req.query.page) || 1;
-        const pageSize = parseInt(req.query.pagination?.pageSize) || parseInt(req.query.pageSize) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+
         const keyword = req.query.keyword || '';
-        const parent_id = req.query.parent_id || null;
-        const sortQuery = req.query.sort || 'createdAt:DESC';
+        const parent_id = req.query.parent_id === 'null' ? null : (req.query.parent_id || undefined);
+        const sort = req.query.sort || 'created_at:desc';
         const populate = req.query.populate === '*' ? true : false;
 
-        // Tách sortField và sortOrder
-        let sortField = 'created_at';
-        let sortOrder = -1;
-        if (sortQuery) {
-            const [field, order] = sortQuery.split(':');
-            sortField = field || 'created_at';
-            sortOrder = (order && order.toUpperCase() === 'ASC') ? 1 : -1;
-        }
-
         const result = await productCategoryService.getAllCategories({
-            page, pageSize, keyword, parent_id, sortField, sortOrder, populate
+            page, pageSize, keyword, parent_id, sort, populate
         });
         return res.status(200).json(result);
     } catch (error) {

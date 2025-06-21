@@ -1,55 +1,54 @@
 .shop-product-list .card {
     border: none;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.07);
-    transition: transform 0.2s, box-shadow 0.2s;
-    border-radius: 14px;
+    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 16px;
     background: #fff;
     overflow: hidden;
-    min-height: 340px;
-    padding-bottom: 12px;
+    display: flex;
+    flex-direction: column;
   }
   
   .shop-product-list .card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 6px 18px 0 rgba(226,163,85,0.13);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px 0 rgba(226,163,85,0.2);
   }
   
-  .shop-product-list .card img {
-    object-fit: contain;
+  .shop-product-list .card-img-top {
+    object-fit: cover;
     width: 100%;
-    height: 120px;
-    border-radius: 14px 14px 0 0;
+    height: 200px;
+    border-radius: 0;
     background: #f8f8f8;
-    margin-bottom: 8px;
   }
   
-  .shop-product-list .card-title {
+  .shop-product-list .product-title {
     font-size: 1rem;
     font-weight: 600;
     color: #333;
     min-height: 40px;
-    margin-bottom: 4px;
+    margin: 0;
+    line-height: 1.25;
   }
   
   .shop-product-list .rating {
     display: flex;
     align-items: center;
     gap: 2px;
-    font-size: 0.95rem;
-    margin-bottom: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
   }
   
   .shop-product-list .btn-cart {
     background: #e2a355;
     color: #fff;
     border: none;
-    border-radius: 7px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 7px 0;
-    width: 100%;
-    margin-bottom: 6px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 12px;
     transition: background 0.2s;
+    text-transform: uppercase;
   }
   
   .shop-product-list .btn-cart:hover {
@@ -57,13 +56,13 @@
   }
   
   .shop-product-list .btn-wishlist {
-    background: #fff;
-    border: 1px solid #e2a355;
-    color: #e2a355;
-    border-radius: 7px;
-    font-size: 1.1rem;
-    width: 36px;
-    height: 36px;
+    background: #f5f5f5;
+    border: 1px solid #eee;
+    color: #888;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    width: 46px;
+    height: 46px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -73,46 +72,57 @@
   .shop-product-list .btn-wishlist:hover {
     background: #e2a355;
     color: #fff;
+    border-color: #e2a355;
   }
   
-  .shop-product-list .card .position-absolute {
-    font-size: 0.95rem;
+  .shop-product-list .product-sale-badge {
+    top: 0;
+    left: 0;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: #e2a355;
-    background: #fffbe6 !important;
+    color: #d18c3b;
+    background: #fff5e6 !important;
     border: 1px solid #e2a355 !important;
-    padding: 2px 10px !important;
+    padding: 4px 8px !important;
   }
   
   .shop-product-list .card-body {
-    padding: 0 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
   }
   
-  .shop-product-list .card-text h3 {
-    font-size: 1.1rem;
-    margin-bottom: 2px;
+  .shop-product-list .product-price {
+    font-size: 1.2rem;
+    margin-bottom: 0;
+    font-weight: 700;
+    color: #e2a355;
   }
   
-  .shop-product-list .card-text span {
+  .shop-product-list .old-price {
     font-size: 0.95rem;
+    color: #aaa;
+    text-decoration: line-through;
+    margin-left: 8px;
+    font-weight: 400;
   }
   
   @media (max-width: 992px) {
-    .shop-product-list .card img {
-      height: 90px;
+    .shop-product-list .card-img-top {
+      height: 180px;
     }
-    .shop-product-list .card-title {
+    .shop-product-list .product-title {
       font-size: 0.95rem;
-      min-height: 32px;
+      min-height: 38px;
     }
   }
   
   @media (max-width: 768px) {
     .shop-product-list .card {
-      min-height: 260px;
-      padding-bottom: 6px;
+      min-height: auto;
     }
-    .shop-product-list .card img {
-      height: 70px;
+    .shop-product-list .card-img-top {
+      height: 160px;
     }
   }

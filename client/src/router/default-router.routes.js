@@ -22,7 +22,15 @@ export const DefaultRouter = [
     element: <Shopage />,
   },
   {
+    path: "/shop/:categorySlug",
+    element: <Shopage />,
+  },
+  {
     path: "/product",
+    element: <SingleProduct />,
+  },
+  {
+    path: "/product/:productId",
     element: <SingleProduct />,
   },
   {

@@ -7,8 +7,11 @@ import { PersistGate } from "redux-persist/integration/react";
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { IndexRouters } from './router/index.routes';
 import { SimpleRouter } from './router/simple-router.routes';
+import reduxStore from "./redux";
 
 const queryClient = new QueryClient();
+
+const { store, persistor } = reduxStore();
 
 const router = createBrowserRouter(
   [
@@ -21,15 +24,15 @@ const router = createBrowserRouter(
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* <Provider> */}
-    {/* <PersistGate> */}
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} >
-        <App />
-      </RouterProvider>
-    </QueryClientProvider>
-    {/* </PersistGate> */}
-    {/* </Provider> */}
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} >
+            <App />
+          </RouterProvider>
+        </QueryClientProvider>
+      </PersistGate>
+    </Provider>
   </StrictMode>
 );
 

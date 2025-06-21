@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useSearchParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { Image } from 'antd';
 import item1 from "../../../../assets/images/item8.jpg"; // Thay bằng ảnh thật nếu có
+import { apiGetProduct } from "../../../../services/product/product";
 
 const productImages = [
   item1,
@@ -13,49 +17,114 @@ const productTypes = [
   { label: "ĐẸP DA LÔNG (VÀNG)", value: "vang" }
 ];
 
-const Product = () => {
+const Product = ({ onProductData }) => {
   const [selectedImg, setSelectedImg] = useState(0);
-  const [selectedType, setSelectedType] = useState(productTypes[0].value);
+  const [selectedType, setSelectedType] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const { productId } = useParams();
+  const [searchParams] = useSearchParams();
+
+  // Lấy thông tin category từ URL query params
+  const categoryName = searchParams.get('category');
+  const categorySlug = searchParams.get('categorySlug');
+
+  // Lấy dữ liệu từ API
+  const { data: getProduct, isLoading } = useQuery({
+    queryKey: ['product', productId],
+    queryFn: () => apiGetProduct({ productId, populate: true }).then(res => res.data),
+  });
+
+  // Xử lý dữ liệu sản phẩm
+  const product = getProduct?.data;
+
+  // Truyền thông tin sản phẩm lên component cha
+  useEffect(() => {
+    if (product && onProductData) {
+      onProductData(product);
+    }
+  }, [product, onProductData]);
+
+  if (isLoading) return <div>Đang tải...</div>;
+  if (!product) return <div>Không tìm thấy sản phẩm</div>;
+
+  // Lấy danh sách variant
+  const variants = product.variants || [];
+
+  // Lấy danh sách ảnh tổng
+  const images = product.images || [];
+
+  // Lấy tags
+  const tags = product.tags || [];
+
+  // Ảnh chính: nếu đã chọn variant thì ưu tiên ảnh của variant, không thì lấy ảnh product
+  const mainImages = selectedType
+    ? images.filter(img => img.product_variant_id === selectedType)
+    : images.filter(img => img.product_id === product._id);
+
+  // Khi chọn variant, set selectedType là _id của variant
+  const handleSelectVariant = (variantId) => {
+    setSelectedType(variantId);
+    setSelectedImg(0);
+  };
+
+  // Lấy variant đang chọn
+  const selectedVariant = variants.find(v => v._id === selectedType) || variants[0];
+
+  // Ảnh của variant đang chọn
+  const variantImages = images.filter(img => img.product_variant_id === selectedVariant?._id);
+
+  // Ảnh hiển thị (ưu tiên ảnh variant, fallback ảnh product)
+  const displayImages = variantImages.length > 0 ? variantImages : images.filter(img => img.product_id === product._id);
 
   return (
     <div className="row">
       {/* Ảnh sản phẩm */}
       <div className="col-md-5">
         <div className="text-center mb-3">
-          <img src={productImages[selectedImg]} alt="main" style={{ width: 320, borderRadius: 12, boxShadow: "0 2px 12px #eee" }} />
+          <Image
+            src={displayImages[selectedImg]?.media_id?.file_path || item1}
+            alt="main"
+            width={320}
+            style={{ borderRadius: 12, boxShadow: "0 2px 12px #eee" }}
+            fallback={item1}
+            preview={true}
+          />
         </div>
         <div className="d-flex justify-content-center gap-2">
-          {productImages.map((img, idx) => (
-            <img
-              key={idx}
-              src={img}
+          {displayImages.map((img, idx) => (
+            <Image
+              key={img._id}
+              src={img.media_id?.file_path || item1}
               alt={`thumb-${idx}`}
+              width={60}
+              height={60}
               style={{
-                width: 60,
-                height: 60,
                 objectFit: "cover",
                 borderRadius: 8,
                 border: selectedImg === idx ? "2px solid #e2a355" : "1px solid #eee",
                 cursor: "pointer"
               }}
               onClick={() => setSelectedImg(idx)}
+              fallback={item1}
+              preview={false}
             />
           ))}
         </div>
       </div>
       {/* Thông tin sản phẩm */}
       <div className="col-md-7">
-        <h2 className="fw-bold mb-2">Hạt mềm cho chó Nutri Plan Softmune 200g</h2>
+        <h2 className="fw-bold mb-2">{product.name}</h2>
         <div className="mb-2" style={{ fontSize: 15 }}>
-          Thương hiệu: <span style={{ color: "#e2a355" }}>Nutri Plan</span> &nbsp;|&nbsp;
-          Tình trạng: <span style={{ color: "#2ecc40" }}>Còn hàng</span>
+          Thương hiệu: <span style={{ color: "#e2a355" }}>{product.brand_id?.name}</span> &nbsp;|&nbsp;
+          Danh mục: <span style={{ color: "#e2a355" }}>{product.category_id?.name}</span> &nbsp;|&nbsp;
+          Tình trạng: {selectedVariant?.stock_quantity > 0 ? (
+            <span style={{ color: "#2ecc40" }}>Còn hàng</span>
+          ) : (
+            <span style={{ color: "#ff4d2d" }}>Hết hàng</span>
+          )}
         </div>
         <div className="mb-2" style={{ fontSize: 15 }}>
-          SKU: HMCNS200X &nbsp;|&nbsp; Serial: 880107464354
-        </div>
-        <div className="mb-2">
-          <span style={{ color: "#e2a355", fontSize: 22, fontWeight: 700 }}>40.000đ</span>
+          Giá: <b style={{ color: "#e2a355" }}>${selectedVariant?.price || product.base_price}</b>
         </div>
         <div className="mb-2">
           <span style={{ color: "#e2a355" }}>
@@ -63,37 +132,41 @@ const Product = () => {
               <iconify-icon key={i} icon="clarity:star-solid" class="text-primary" style={{ color: "#e2a355", fontSize: 18 }}></iconify-icon>
             ))}
           </span>
-          <span className="ms-2" style={{ fontSize: 15, color: "#007bff", cursor: "pointer" }}>Viết đánh giá của bạn</span>
         </div>
         <div className="mb-3" style={{ fontSize: 15, color: "#444" }}>
-          <span role="img" aria-label="dog">🐶</span> HẠT MỀM CHO CHÓ NUTRI PLAN SOFTMUNE – SIÊU PHẨM DINH DƯỠNG CHO CÚN YÊU! Bạn đang tìm kiếm một loại hạt mềm, dễ nhai, giàu dinh dưỡng giúp cún yêu khỏe mạnh, lông mượt, xương chắc? <br />
-          <span style={{ color: "#e2a355", cursor: "pointer" }}>[Xem tiếp]</span>
+          <span role="img" aria-label="dog">🐶</span> {product.description}
         </div>
+        {/* Hiển thị các loại variant */}
         <div className="mb-2" style={{ fontSize: 15 }}>
           <span className="fw-bold">Loại:</span>
           <div className="d-flex flex-wrap gap-2 mt-2">
-            {productTypes.map(type => (
+            {variants.map(variant => (
               <button
-                key={type.value}
+                key={variant._id}
                 className="btn"
                 style={{
-                  border: selectedType === type.value ? "2px solid #e2a355" : "1px solid #ddd",
-                  background: selectedType === type.value ? "#fff7ea" : "#fff",
+                  border: selectedType === variant._id ? "2px solid #e2a355" : "1px solid #ddd",
+                  background: selectedType === variant._id ? "#fff7ea" : "#fff",
                   color: "#e2a355",
                   fontWeight: 600,
                   borderRadius: 8,
                   padding: "6px 16px"
                 }}
-                onClick={() => setSelectedType(type.value)}
+                onClick={() => handleSelectVariant(variant._id)}
               >
-                {type.label}
+                {variant.attributes.map(attr => attr.attribute_value_id?.value).join(' / ')}
               </button>
             ))}
           </div>
         </div>
-        <div className="mb-3 d-flex flex-wrap gap-2">
-          <span className="border rounded px-2 py-1" style={{ fontSize: 14 }}>TÚI 1.2KG 6 TỐT XƯƠNG KHỚP (XANH)</span>
-          <span className="border rounded px-2 py-1" style={{ fontSize: 14 }}>TÚI 1.2KG 6 ĐẸP DA LÔNG (VÀNG)</span>
+        {/* Hiển thị tags */}
+        <div className="mb-2">
+          <span className="fw-bold">Tags:</span>
+          {tags.map(tag => (
+            <span key={tag._id} className="badge bg-warning text-dark ms-2">
+              {tag.tag_id?.name}
+            </span>
+          ))}
         </div>
         <div className="d-flex align-items-center gap-2 mb-3">
           <button className="btn btn-light border" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>

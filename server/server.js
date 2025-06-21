@@ -10,50 +10,51 @@ import { Server } from 'socket.io' // 👈 Thêm dòng này
 const app = express()
 const server = http.createServer(app); // 👈 Tạo server từ http
 
-// const io = new Server(server, {
-//     cors: {
-//         origin: 'http://localhost:4001',
-//         methods: ['GET', 'POST'],
-//         credentials: true,
-//     }
-// });
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:4001',
+        methods: ['GET', 'POST'],
+        credentials: true,
+    }
+});
 
-// io.on('connection', (socket) => {
+io.on('connection', (socket) => {
 
-//     // Nhận userId và gán socket vào phòng tương ứng
-//     socket.on('register', (userId) => {
-//         socket.join(userId);
-//     });
+    // Nhận userId và gán socket vào phòng tương ứng
+    socket.on('register', (userId) => {
+        socket.join(userId);
+    });
 
-//     // Nhận và gửi tin nhắn real-time
-//     socket.on('send_message', ({ toUserId, message }) => {
-//         io.to(toUserId).emit('receive_message', message);
-//     });
+    // Nhận và gửi tin nhắn real-time
+    socket.on('send_message', ({ toUserId, message }) => {
+        io.to(toUserId).emit('receive_message', message);
+    });
 
-//     socket.on("typing", ({ conversationId, fromUserId, toUserId }) => {
-//         io.to(toUserId).emit("user_typing", { conversationId, fromUserId });
-//     });
-
-
-//     // Gửi notification
-//     socket.on('send_notification', ({ toUserId, notification }) => {
-//         io.to(toUserId).emit("receive_notification", notification);
-//     });
-
-//     socket.on('disconnect', () => {
-//     });
-// });
-
-// io.on("connection_error", (err) => {
-// });
+    socket.on("typing", ({ conversationId, fromUserId, toUserId }) => {
+        io.to(toUserId).emit("user_typing", { conversationId, fromUserId });
+    });
 
 
-// app.use(cors({
-//     origin: 'http://localhost:4001',
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     credentials: true,
-//     allowedHeaders: ['Content-Type', 'Authorization']
-// }))
+    // Gửi notification
+    socket.on('send_notification', ({ toUserId, notification }) => {
+        io.to(toUserId).emit("receive_notification", notification);
+    });
+
+    socket.on('disconnect', () => {
+    });
+});
+
+io.on("connection_error", (err) => {
+    console.log(err);
+});
+
+
+app.use(cors({
+    origin: 'http://localhost:4001',
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))
 
 // app.options('*', cors({
 //     origin: 'http://localhost:4001',
