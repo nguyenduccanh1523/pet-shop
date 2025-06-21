@@ -4,18 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Image } from 'antd';
 import item1 from "../../../../assets/images/item8.jpg"; // Thay bằng ảnh thật nếu có
 import { apiGetProduct } from "../../../../services/product/product";
+import LoadingSpinner from '../../loading/loading';
 
-const productImages = [
-  item1,
-  item1,
-  item1,
-  item1
-];
 
-const productTypes = [
-  { label: "TỐT XƯƠNG KHỚP (XANH)", value: "xanh" },
-  { label: "ĐẸP DA LÔNG (VÀNG)", value: "vang" }
-];
 
 const Product = ({ onProductData }) => {
   const [selectedImg, setSelectedImg] = useState(0);
@@ -40,15 +31,34 @@ const Product = ({ onProductData }) => {
   // Truyền thông tin sản phẩm lên component cha
   useEffect(() => {
     if (product && onProductData) {
-      onProductData(product);
+      onProductData({
+        ...product,
+        category: {
+          name: product.category_id?.name,
+          slug: product.category_id?.name
+            ? product.category_id.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+            : ''
+        }
+      });
     }
-  }, [product, onProductData]);
+    // eslint-disable-next-line
+  }, [product]);
 
-  if (isLoading) return <div>Đang tải...</div>;
+  
+  // Khi product hoặc variants thay đổi, mặc định chọn variant đầu tiên nếu chưa chọn
+  useEffect(() => {
+    if (product?.variants && product.variants.length > 0 && !selectedType) {
+      setSelectedType(product.variants[0]._id);
+    }
+    // eslint-disable-next-line
+  }, [productId, product?.variants]);
+
+  if (isLoading) return <LoadingSpinner />;
   if (!product) return <div>Không tìm thấy sản phẩm</div>;
 
   // Lấy danh sách variant
   const variants = product.variants || [];
+
 
   // Lấy danh sách ảnh tổng
   const images = product.images || [];
@@ -128,9 +138,9 @@ const Product = ({ onProductData }) => {
         </div>
         <div className="mb-2">
           <span style={{ color: "#e2a355" }}>
-            {[1,2,3,4,5].map(i => (
+            {[1, 2, 3, 4, 5].map(i => (
               <iconify-icon key={i} icon="clarity:star-solid" class="text-primary" style={{ color: "#e2a355", fontSize: 18 }}></iconify-icon>
-            ))}
+            ))} 5.0
           </span>
         </div>
         <div className="mb-3" style={{ fontSize: 15, color: "#444" }}>

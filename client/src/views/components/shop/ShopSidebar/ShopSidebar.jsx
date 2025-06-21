@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { apiGetProductCategory } from "../../../../services/product/productCategory";
+import LoadingSpinner from '../../loading/loading';
 
 const ArrowIcon = ({ open }) => (
   <span style={{
@@ -92,11 +93,7 @@ const ShopSidebar = ({ onCategoryClick, onClose }) => {
       </div>
       
       {isproductCategoryLoading ? (
-        <div className="text-center py-4">
-          <div className="spinner-border text-warning" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+        <LoadingSpinner />
       ) : (
         <ul className="list-unstyled mb-4" style={{ paddingLeft: 0 }}>
           {productCategory?.data?.map((cat) => (

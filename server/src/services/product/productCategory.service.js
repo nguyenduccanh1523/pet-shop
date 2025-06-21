@@ -1,6 +1,7 @@
 import ProductCategory from '../../models/productCategory.js';
 import Product from '../../models/product.js';
 import mongoose from 'mongoose';
+import { ProductImage, ProductTag, Tag, Media, ProductVariant } from '../../models/index.js';
 
 // Lấy tất cả danh mục (có phân trang, tìm kiếm, lọc)
 export const getAllCategories = async ({
@@ -43,30 +44,86 @@ export const getAllCategories = async ({
         const categoryIds = categories.map(cat => cat._id);
         // Lấy tất cả products thuộc các category này
         const products = await Product.find({ category_id: { $in: categoryIds }, deleted_at: null }).lean();
-        
-        // Lấy tất cả category con thuộc các category này
+        const productIds = products.map(p => p._id);
+
+        // Lấy tất cả products của các children categories
         const childCategories = await ProductCategory.find({ 
             parent_id: { $in: categoryIds }, 
             deleted_at: null 
         }).lean();
-        
         // Lấy tất cả products của các children categories
         const childCategoryIds = childCategories.map(child => child._id);
         const childProducts = await Product.find({ 
             category_id: { $in: childCategoryIds }, 
             deleted_at: null 
         }).lean();
-        
-        // Gán products và children vào từng category
+
+        // Gộp tất cả product cha và product con
+        const allProducts = [
+            ...products,
+            ...childProducts
+        ];
+        const allProductIds = allProducts.map(p => p._id);
+
+        // Lấy variants của tất cả product (cha + con)
+        const variants = await ProductVariant.find({ product_id: { $in: allProductIds }, deleted_at: null }).lean();
+        const variantIds = variants.map(v => v._id);
+
+        // Lấy images của tất cả product và variant, populate media
+        const images = await ProductImage.find({
+            $or: [
+                { product_id: { $in: allProductIds } },
+                { product_variant_id: { $in: variantIds } }
+            ],
+            deleted_at: null
+        }).populate('media_id').lean();
+
+        // Lấy tags của tất cả product, populate tag_id
+        const tags = await ProductTag.find({ product_id: { $in: allProductIds } }).populate('tag_id').lean();
+
+        console.log('ALL VARIANTS:', variants.map(v => ({ _id: v._id, product_id: v.product_id })));
+
         categories = categories.map(cat => ({
             ...cat,
-            products: products.filter(p => p.category_id.toString() === cat._id.toString()),
+            products: products.filter(p => p.category_id.toString() === cat._id.toString()).map(p => {
+                // Lấy variants của product
+                const productVariants = variants.filter(v => v.product_id.toString() === p._id.toString());
+                // Lấy images của product và variant
+                const productImages = [
+                    ...images.filter(img => img.product_id && img.product_id.toString() === p._id.toString()),
+                    ...images.filter(img => img.product_variant_id && productVariants.some(v => v._id.toString() === img.product_variant_id.toString()))
+                ];
+                // Lấy tags của product
+                const productTags = tags.filter(t => t.product_id.toString() === p._id.toString() && t.tag_id);
+                return {
+                    ...p,
+                    variants: productVariants,
+                    images: productImages,
+                    tags: productTags.map(t => t.tag_id).filter(Boolean)
+                };
+            }),
             children: childCategories.filter(child => 
                 child.parent_id.toString() === cat._id.toString()
-            ).map(child => ({
-                ...child,
-                products: childProducts.filter(p => p.category_id.toString() === child._id.toString())
-            }))
+            ).map(child => {
+                const childProds = childProducts.filter(p => p.category_id.toString() === child._id.toString());
+                return {
+                    ...child,
+                    products: childProds.map(p => {
+                        const productVariants = variants.filter(v => v.product_id.toString() === p._id.toString());
+                        const productImages = [
+                            ...images.filter(img => img.product_id && img.product_id.toString() === p._id.toString()),
+                            ...images.filter(img => img.product_variant_id && productVariants.some(v => v._id.toString() === img.product_variant_id.toString()))
+                        ];
+                        const productTags = tags.filter(t => t.product_id.toString() === p._id.toString() && t.tag_id);
+                        return {
+                            ...p,
+                            variants: productVariants,
+                            images: productImages,
+                            tags: productTags.map(t => t.tag_id).filter(Boolean)
+                        };
+                    })
+                };
+            })
         }));
     }
 

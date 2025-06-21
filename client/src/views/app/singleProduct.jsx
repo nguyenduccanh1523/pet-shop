@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Review from "../components/products/Review/review";
 import Product from "../components/products/Product/product";
@@ -7,9 +7,10 @@ import Product from "../components/products/Product/product";
 const SingleProduct = () => {
     const [productData, setProductData] = useState(null);
 
-    const handleProductData = (data) => {
+    // Sử dụng useCallback để tránh tạo function mới mỗi lần render
+    const handleProductData = useCallback((data) => {
         setProductData(data);
-    };
+    }, []);
 
     return (
         <div className="container py-4">

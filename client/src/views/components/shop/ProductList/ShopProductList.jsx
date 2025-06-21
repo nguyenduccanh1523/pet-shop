@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiGetProductCategory } from "../../../../services/product/productCategory";
 import item8 from "../../../../assets/images/item8.jpg"
 import './ShopProductList.css';
+import LoadingSpinner from '../../loading/loading';
 
 const products = [
     {
@@ -101,6 +102,7 @@ const products = [
 const ShopProductList = () => {
     const [sort, setSort] = useState("default");
     const { categorySlug } = useParams();
+    
     const navigate = useNavigate();
 
     // Lấy dữ liệu categories với products
@@ -222,11 +224,7 @@ const ShopProductList = () => {
             </div>
 
             {isLoading ? (
-                <div className="text-center py-5">
-                    <div className="spinner-border text-warning" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                </div>
+                <LoadingSpinner />
             ) : categorySlug && !currentCategory ? (
                 <div className="text-center py-5">
                     <h4 className="text-muted">Không tìm thấy danh mục</h4>
@@ -248,12 +246,12 @@ const ShopProductList = () => {
                                 onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                                 onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
                             >
-                                {product.sale && (
+                                {product.tags && (
                                     <div className="product-sale-badge z-1 position-absolute rounded-3 m-2 px-2">
-                                        -{Math.round(100 - ((product.base_price || product.price) / product.oldPrice) * 100)}%
+                                        {product?.tags?.[0]?.name}
                                     </div>
                                 )}
-                                <img src={product.image || product.images?.[0] || item8} className="card-img-top" alt={product.name} />
+                                <img src={ product.images?.[0]?.media_id?.file_path || item8} className="card-img-top" alt={product.name} />
                                 <div className="card-body d-flex flex-column p-3">
                                     <div>
                                         <h3 className="product-title">{product.name}</h3>
