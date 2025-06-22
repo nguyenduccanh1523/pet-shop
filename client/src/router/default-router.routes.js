@@ -1,4 +1,5 @@
 import Blog from "../views/app/blog";
+import BlogDetail from "../views/components/blog/blogDetail";
 import Cart from "../views/app/cart";
 import Checkout from "../views/app/checkout";
 import Contact from "../views/app/contact";
@@ -9,10 +10,20 @@ import SingleProduct from "../views/app/singleProduct";
 import Store from "../views/app/store";
 import Support from "../views/app/support";
 import SingleStore from "../views/components/store/SingleStore/singleStore";
+import Login from "../views/auth/login";
+import Register from "../views/auth/register";
 
 
 
 export const DefaultRouter = [
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
   {
     path: "/",
     element: <Homepage />,
@@ -52,6 +63,10 @@ export const DefaultRouter = [
   {
     path: "/blog",
     element: <Blog />,
+  },
+  {
+    path: "/blog/:id",
+    element: <BlogDetail />,
   },
   {
     path: "/favorite",

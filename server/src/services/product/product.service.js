@@ -84,14 +84,27 @@ export const getAllProducts = async ({
             deleted_at: null 
         }).lean();
         
-        // Lấy images
+        // Lấy variant attributes cho từng variant
+        const variantIds = variants.map(v => v._id);
+        const variantAttributes = await ProductVariantAttribute.find({
+            product_variant_id: { $in: variantIds },
+            deleted_at: null
+        }).populate('attribute_value_id').lean();
+        
+        // Gán attributes vào từng variant
+        variants.forEach(variant => {
+            variant.attributes = variantAttributes.filter(
+                attr => attr.product_variant_id.toString() === variant._id.toString()
+            );
+        });
+        
+        // Lấy images của product
         const images = await ProductImage.find({ 
             product_id: { $in: productIds }, 
             deleted_at: null 
         }).populate('media_id').lean();
         
         // Lấy images của các variant
-        const variantIds = variants.map(v => v._id);
         const variantImages = await ProductImage.find({
             product_variant_id: { $in: variantIds },
             deleted_at: null
@@ -104,12 +117,20 @@ export const getAllProducts = async ({
         
         // Gán thông tin vào từng product
         products.forEach(product => {
+            // Gán variants với attributes
             product.variants = variants.filter(v => v.product_id.toString() === product._id.toString());
-            product.images = [
-                ...images.filter(img => img.product_id.toString() === product._id.toString()),
-                ...variantImages.filter(img => img.product_variant_id.toString() === product._id.toString())
-            ];
-            product.tags = tags.filter(tag => tag.tag_id);
+            
+            // Gán images (cả product và variant images)
+            const productImages = images.filter(img => img.product_id.toString() === product._id.toString());
+            const productVariantImages = variantImages.filter(img => 
+                product.variants.some(variant => variant._id.toString() === img.product_variant_id.toString())
+            );
+            product.images = [...productImages, ...productVariantImages];
+            
+            // Gán tags chỉ của sản phẩm này
+            product.tags = tags.filter(tag => 
+                tag.product_id.toString() === product._id.toString() && tag.tag_id
+            );
         });
     }
 
@@ -265,14 +286,27 @@ export const getProductsByCategory = async (categoryId, options = {}) => {
             deleted_at: null 
         }).lean();
         
-        // Lấy images
+        // Lấy variant attributes cho từng variant
+        const variantIds = variants.map(v => v._id);
+        const variantAttributes = await ProductVariantAttribute.find({
+            product_variant_id: { $in: variantIds },
+            deleted_at: null
+        }).populate('attribute_value_id').lean();
+        
+        // Gán attributes vào từng variant
+        variants.forEach(variant => {
+            variant.attributes = variantAttributes.filter(
+                attr => attr.product_variant_id.toString() === variant._id.toString()
+            );
+        });
+        
+        // Lấy images của product
         const images = await ProductImage.find({ 
             product_id: { $in: productIds }, 
             deleted_at: null 
         }).populate('media_id').lean();
         
         // Lấy images của các variant
-        const variantIds = variants.map(v => v._id);
         const variantImages = await ProductImage.find({
             product_variant_id: { $in: variantIds },
             deleted_at: null
@@ -285,12 +319,20 @@ export const getProductsByCategory = async (categoryId, options = {}) => {
         
         // Gán thông tin vào từng product
         products.forEach(product => {
+            // Gán variants với attributes
             product.variants = variants.filter(v => v.product_id.toString() === product._id.toString());
-            product.images = [
-                ...images.filter(img => img.product_id.toString() === product._id.toString()),
-                ...variantImages.filter(img => img.product_variant_id.toString() === product._id.toString())
-            ];
-            product.tags = tags.filter(tag => tag.tag_id);
+            
+            // Gán images (cả product và variant images)
+            const productImages = images.filter(img => img.product_id.toString() === product._id.toString());
+            const productVariantImages = variantImages.filter(img => 
+                product.variants.some(variant => variant._id.toString() === img.product_variant_id.toString())
+            );
+            product.images = [...productImages, ...productVariantImages];
+            
+            // Gán tags chỉ của sản phẩm này
+            product.tags = tags.filter(tag => 
+                tag.product_id.toString() === product._id.toString() && tag.tag_id
+            );
         });
     }
 
@@ -345,14 +387,27 @@ export const searchProducts = async (keyword, options = {}) => {
             deleted_at: null 
         }).lean();
         
-        // Lấy images
+        // Lấy variant attributes cho từng variant
+        const variantIds = variants.map(v => v._id);
+        const variantAttributes = await ProductVariantAttribute.find({
+            product_variant_id: { $in: variantIds },
+            deleted_at: null
+        }).populate('attribute_value_id').lean();
+        
+        // Gán attributes vào từng variant
+        variants.forEach(variant => {
+            variant.attributes = variantAttributes.filter(
+                attr => attr.product_variant_id.toString() === variant._id.toString()
+            );
+        });
+        
+        // Lấy images của product
         const images = await ProductImage.find({ 
             product_id: { $in: productIds }, 
             deleted_at: null 
         }).populate('media_id').lean();
         
         // Lấy images của các variant
-        const variantIds = variants.map(v => v._id);
         const variantImages = await ProductImage.find({
             product_variant_id: { $in: variantIds },
             deleted_at: null
@@ -365,12 +420,20 @@ export const searchProducts = async (keyword, options = {}) => {
         
         // Gán thông tin vào từng product
         products.forEach(product => {
+            // Gán variants với attributes
             product.variants = variants.filter(v => v.product_id.toString() === product._id.toString());
-            product.images = [
-                ...images.filter(img => img.product_id.toString() === product._id.toString()),
-                ...variantImages.filter(img => img.product_variant_id.toString() === product._id.toString())
-            ];
-            product.tags = tags.filter(tag => tag.tag_id);
+            
+            // Gán images (cả product và variant images)
+            const productImages = images.filter(img => img.product_id.toString() === product._id.toString());
+            const productVariantImages = variantImages.filter(img => 
+                product.variants.some(variant => variant._id.toString() === img.product_variant_id.toString())
+            );
+            product.images = [...productImages, ...productVariantImages];
+            
+            // Gán tags chỉ của sản phẩm này
+            product.tags = tags.filter(tag => 
+                tag.product_id.toString() === product._id.toString() && tag.tag_id
+            );
         });
     }
 

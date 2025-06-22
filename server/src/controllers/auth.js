@@ -34,20 +34,10 @@ export const register = async (req, res) => {
       ...result.data
     } : {
       success: result.success,
-      message: result.message,
-      error: {
-        message: result.error
-      }
+      message: result.message
     });
   } catch (error) {
-    console.error('Register controller error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: {
-        message: error.message
-      }
-    });
+    return res.status(500).json({ success: false, message: 'Lỗi server', error: error.message });
   }
 };
 
@@ -60,20 +50,10 @@ export const login = async (req, res) => {
       ...result.data
     } : {
       success: result.success,
-      message: result.message,
-      error: {
-        message: result.error
-      }
+      message: result.message
     });
   } catch (error) {
-    console.error('Login controller error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: {
-        message: error.message
-      }
-    });
+    return res.status(500).json({ success: false, message: 'Lỗi server', error: error.message });
   }
 };
 

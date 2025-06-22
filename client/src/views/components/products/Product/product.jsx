@@ -44,7 +44,7 @@ const Product = ({ onProductData }) => {
     // eslint-disable-next-line
   }, [product]);
 
-  
+
   // Khi product hoặc variants thay đổi, mặc định chọn variant đầu tiên nếu chưa chọn
   useEffect(() => {
     if (product?.variants && product.variants.length > 0 && !selectedType) {
@@ -136,6 +136,24 @@ const Product = ({ onProductData }) => {
         <div className="mb-2" style={{ fontSize: 15 }}>
           Giá: <b style={{ color: "#e2a355" }}>${selectedVariant?.price || product.base_price}</b>
         </div>
+        {/* Hiển thị SKU của variant đang chọn */}
+        <div className="mb-2" style={{ fontSize: 15 }}>
+          <span className="fw-bold">Mã SKU:</span>
+          <span
+            style={{
+              color: "#e2a355",
+              fontWeight: 600,
+              background: "#fff7ea",
+              padding: "4px 12px",
+              borderRadius: 6,
+              marginLeft: 8,
+              fontFamily: "monospace",
+              fontSize: 14
+            }}
+          >
+            {selectedVariant?.sku || "N/A"}
+          </span>
+        </div>
         <div className="mb-2">
           <span style={{ color: "#e2a355" }}>
             {[1, 2, 3, 4, 5].map(i => (
@@ -147,37 +165,41 @@ const Product = ({ onProductData }) => {
           <span role="img" aria-label="dog">🐶</span> {product.description}
         </div>
         {/* Hiển thị các loại variant */}
-        <div className="mb-2" style={{ fontSize: 15 }}>
-          <span className="fw-bold">Loại:</span>
-          <div className="d-flex flex-wrap gap-2 mt-2">
-            {variants.map(variant => (
-              <button
-                key={variant._id}
-                className="btn"
-                style={{
-                  border: selectedType === variant._id ? "2px solid #e2a355" : "1px solid #ddd",
-                  background: selectedType === variant._id ? "#fff7ea" : "#fff",
-                  color: "#e2a355",
-                  fontWeight: 600,
-                  borderRadius: 8,
-                  padding: "6px 16px"
-                }}
-                onClick={() => handleSelectVariant(variant._id)}
-              >
-                {variant.attributes.map(attr => attr.attribute_value_id?.value).join(' / ')}
-              </button>
+        {variants && variants.length > 0 && (
+          <div className="mb-2" style={{ fontSize: 15 }}>
+            <span className="fw-bold">Loại:</span>
+            <div className="d-flex flex-wrap gap-2 mt-2">
+              {variants.map(variant => (
+                <button
+                  key={variant._id}
+                  className="btn"
+                  style={{
+                    border: selectedType === variant._id ? "2px solid #e2a355" : "1px solid #ddd",
+                    background: selectedType === variant._id ? "#fff7ea" : "#fff",
+                    color: "#e2a355",
+                    fontWeight: 600,
+                    borderRadius: 8,
+                    padding: "6px 16px"
+                  }}
+                  onClick={() => handleSelectVariant(variant._id)}
+                >
+                  {variant.attributes.map(attr => attr.attribute_value_id?.value).join(' / ')}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* Hiển thị tags */}
+        {tags && tags.length > 0 && (
+          <div className="mb-2">
+            <span className="fw-bold">Tags:</span>
+            {tags.map(tag => (
+              <span key={tag._id} className="badge bg-warning text-dark ms-2">
+                {tag.tag_id?.name}
+              </span>
             ))}
           </div>
-        </div>
-        {/* Hiển thị tags */}
-        <div className="mb-2">
-          <span className="fw-bold">Tags:</span>
-          {tags.map(tag => (
-            <span key={tag._id} className="badge bg-warning text-dark ms-2">
-              {tag.tag_id?.name}
-            </span>
-          ))}
-        </div>
+        )}
         <div className="d-flex align-items-center gap-2 mb-3">
           <button className="btn btn-light border" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
           <span style={{ minWidth: 32, textAlign: "center" }}>{quantity}</span>

@@ -10,6 +10,8 @@ import Tag from './tag.js';
 import Advertisement from './advertisement.js'
 import Attribute from './attribute.js'
 import Media from './media.js'
+import User from './user.js'
+import Role from './role.js'
 // ... import các model khác nếu cần
 
 export {
@@ -25,6 +27,7 @@ export {
   Advertisement,
   Attribute,
   Media,
-  
+  User,
+  Role
   // ... export các model khác nếu cần
 };

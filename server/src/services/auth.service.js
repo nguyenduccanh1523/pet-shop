@@ -1,11 +1,12 @@
-import db from '../models/user.js';
+import {
+  User,
+  Role,
+  Media
+} from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
-const User = db.User;
-
-// Hằng số thời gian token
 const ACCESS_TOKEN_EXPIRATION = '1h';        // Access token hết hạn sau 1 giờ
 const REFRESH_TOKEN_EXPIRATION = '5d';       // Refresh token hết hạn sau 5 ngày
 const REFRESH_TOKEN_EXPIRATION_MS = 5 * 24 * 60 * 60 * 1000; // 5 ngày tính bằng ms
@@ -36,243 +37,125 @@ const validatePassword = (password) => {
 
 // Đăng ký người dùng mới
 export const registerUser = async (userData) => {
-  const { email, password, confirmPassword, username } = userData;
+  let { email, password, confirmPassword, username, role_id } = userData;
 
-  // Kiểm tra các trường bắt buộc
-  if (!email || !password || !confirmPassword || !username) {
-    return {
-      success: false,
-      statusCode: 400,
-      message: 'Please fill in all required information',
-      error: 'Email, username, password và confirmPassword là bắt buộc'
-    };
+  // Nếu không có role_id thì lấy mặc định
+  if (!role_id) {
+    role_id = '6854d604ab337558a82810ed';
+  }
+  // Nếu không có username thì lấy username = email
+  if (!username) {
+    username = email;
   }
 
-  // Kiểm tra xác nhận mật khẩu
+  if (!email || !password || !confirmPassword || !username || !role_id) {
+    return { success: false, statusCode: 400, message: 'Thiếu thông tin bắt buộc' };
+  }
   if (password !== confirmPassword) {
-    return {
-      success: false,
-      statusCode: 400,
-      message: 'Confirmation password does not match',
-      error: 'Mật khẩu xác nhận không khớp với mật khẩu'
-    };
+    return { success: false, statusCode: 400, message: 'Mật khẩu xác nhận không khớp' };
+  }
+  const existingEmail = await User.findOne({ email });
+  if (existingEmail) {
+    return { success: false, statusCode: 400, message: 'Email đã tồn tại' };
+  }
+  const existingUsername = await User.findOne({ username });
+  if (existingUsername) {
+    return { success: false, statusCode: 400, message: 'Username đã tồn tại' };
   }
 
-  // Kiểm tra độ mạnh của mật khẩu
-  if (!validatePassword(password)) {
-    return {
-      success: false,
-      statusCode: 400,
-      message: 'Password must be at least 8 characters, including uppercase, lowercase, numbers and special characters',
-      error: 'Mật khẩu không đủ mạnh'
-    };
-  }
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  // Nếu không có avatar_id thì lấy mặc định
+  let avatar_id = userData.avatar_id || '6854de4cb6cc2b417b2bdedd';
+  const user = await User.create({
+    documentId: uuidv4(),
+    username,
+    email,
+    password: hashedPassword,
+    role_id,
+    avatar_id
+  });
 
-  try {
-    // Kiểm tra email đã tồn tại hay chưa
-    const existingEmail = await User.findOne({ where: { email } });
-    if (existingEmail) {
-      return {
-        success: false,
-        statusCode: 400,
-        message: 'Email already in use',
-        error: 'Email đã tồn tại'
-      };
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken();
+  const refreshExpires = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION_MS);
+
+  user.refresh_token = refreshToken;
+  user.refresh_token_expires = refreshExpires;
+  await user.save();
+
+  return {
+    success: true,
+    statusCode: 201,
+    message: 'Đăng ký thành công',
+    data: {
+      jwt: accessToken,
+      user: {
+        id: user.documentId,
+        documentId: user.documentId,
+        username: user.username,
+        email: user.email,
+        role: user.role_id,
+        provider: 'local',
+        confirmed: user.email_verified,
+        createdAt: user.created_at,
+        updatedAt: user.updated_at,
+        avatar_id: user.avatar_id
+      },
+      refresh_token: refreshToken
     }
-
-    // Kiểm tra username đã tồn tại hay chưa
-    const existingUsername = await User.findOne({ where: { username } });
-    if (existingUsername) {
-      return {
-        success: false,
-        statusCode: 400,
-        message: 'Username đã được sử dụng',
-        error: 'Username đã tồn tại'
-      };
-    }
-
-    // Mã hóa mật khẩu
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(password, salt);
-
-    // Tạo user mới
-    const user = await User.create({
-      documentId: uuidv4(),
-      fullname: username, // Sử dụng username làm fullname nếu không có
-      username,
-      email,
-      password: hashedPassword,
-      date_of_birth: new Date(), // Giá trị mặc định
-      gender: 'not_specified', // Giá trị mặc định
-      role_id: process.env.ROLE_USER_ID || 'xha2u4697gkn1p9k97ycif3b', // ID của role user thường - đảm bảo ID tồn tại
-      avatar_id: 'k7sy9eta2ox54uf5mzb4zjd8', // ID của avatar mặc định - đảm bảo ID tồn tại
-      status_id: 'l4mzq4qzwwejazzyrmiai580',
-      is_online: true,
-      email_verified: false
-    });
-
-    // Tạo token
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken();
-    const refreshExpires = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION_MS);
-
-    // Lưu refresh token vào database
-    await user.update({
-      refresh_token: refreshToken,
-      refresh_token_expires: refreshExpires
-    });
-
-    // Lấy thêm thông tin avatar nếu có
-    const userWithAvatar = await User.findOne({
-      where: { documentId: user.documentId },
-      include: [{
-        model: db.Media,
-        as: 'avatarMedia',
-        attributes: ['documentId', 'file_path', 'file_type']
-      }]
-    });
-
-    return {
-      success: true,
-      statusCode: 201,
-      message: 'Registration successful',
-      data: {
-        jwt: accessToken,
-        user: {
-          id: user.documentId,
-          documentId: user.documentId,
-          username: user.username,
-          email: user.email,
-          provider: 'local',
-          confirmed: user.email_verified,
-          blocked: user.is_blocked,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-          publishedAt: user.createdAt,
-          avatar_id: userWithAvatar.avatar_id,
-          avatarMedia: userWithAvatar.avatarMedia
-        },
-        refresh_token: refreshToken
-      }
-    };
-  } catch (error) {
-    console.error('Lỗi đăng ký:', error);
-    return {
-      success: false,
-      statusCode: 500,
-      message: 'Lỗi server',
-      error: error.message
-    };
-  }
+  };
 };
 
 // Đăng nhập
 export const loginUser = async (credentials) => {
   const { identifier, password } = credentials;
-
-  // Kiểm tra các trường bắt buộc
   if (!identifier || !password) {
-    return {
-      success: false,
-      statusCode: 400,
-      message: 'Please fill in your login information completely.',
-      error: 'Email và password là bắt buộc'
-    };
+    return { success: false, statusCode: 400, message: 'Thiếu thông tin đăng nhập' };
+  }
+  // Tìm user và populate role, avatarMedia
+  const user = await User.findOne({
+    $or: [{ email: identifier }, { username: identifier }]
+  })
+    .populate({ path: 'role_id', model: 'Role' })
+    .populate({ path: 'avatar_id', model: 'Media' });
+
+  if (!user) {
+    return { success: false, statusCode: 404, message: 'Sai email/username hoặc mật khẩu' };
+  }
+  const isPasswordValid = bcrypt.compareSync(password, user.password);
+  if (!isPasswordValid) {
+    return { success: false, statusCode: 401, message: 'Sai email/username hoặc mật khẩu' };
   }
 
-  try {
-    // Kiểm tra định dạng email
-    const isEmail = /\S+@\S+\.\S+/.test(identifier);
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken();
+  const refreshExpires = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION_MS);
 
-    // Tìm user theo email hoặc username và include avatarMedia
-    const user = await User.findOne({
-      where: isEmail ? { email: identifier } : { username: identifier },
-      include: [
-        {
-          model: db.Media,
-          as: 'avatarMedia',
-          attributes: ['documentId', 'file_path', 'file_type']
-        },
-        {
-          model: db.StatusActivity,
-          as: 'status',
-          attributes: ['documentId', 'name']
-        },
-        {
-          model: db.Role,
-          as: 'role',
-          attributes: ['documentId', 'roleName']
-        }
-      ]
-    });
+  user.refresh_token = refreshToken;
+  user.refresh_token_expires = refreshExpires;
+  await user.save();
 
-    if (!user) {
-      return {
-        success: false,
-        statusCode: 404,
-        message: 'Incorrect email or password',
-        error: 'Thông tin đăng nhập không hợp lệ'
-      };
+  return {
+    success: true,
+    statusCode: 200,
+    message: 'Đăng nhập thành công',
+    data: {
+      jwt: accessToken,
+      user: {
+        id: user.documentId,
+        documentId: user.documentId,
+        username: user.username,
+        email: user.email,
+        role: user.role_id, // đã populate
+        provider: 'local',
+        confirmed: user.email_verified,
+        createdAt: user.created_at,
+        updatedAt: user.updated_at,
+        avatar_id: user.avatar_id,
+      },
+      refresh_token: refreshToken
     }
-
-    // Kiểm tra mật khẩu
-    const isPasswordValid = bcrypt.compareSync(password, user.password);
-    if (!isPasswordValid) {
-      return {
-        success: false,
-        statusCode: 401,
-        message: 'Incorrect email or password',
-        error: 'Thông tin đăng nhập không hợp lệ'
-      };
-    }
-
-    // Cập nhật trạng thái online
-    await user.update({ is_online: true, last_active: new Date() });
-
-    // Tạo access token và refresh token
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken();
-    const refreshExpires = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION_MS);
-
-    // Lưu refresh token vào database
-    await user.update({
-      refresh_token: refreshToken,
-      refresh_token_expires: refreshExpires
-    });
-
-    return {
-      success: true,
-      statusCode: 200,
-      message: 'Đăng nhập thành công',
-      data: {
-        jwt: accessToken,
-        user: {
-          id: user.documentId,
-          documentId: user.documentId,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          provider: 'local',
-          confirmed: user.email_verified,
-          blocked: user.is_blocked,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-          publishedAt: user.createdAt,
-          avatarMedia: user.avatarMedia,
-          statusUser: user.status
-        },
-        refresh_token: refreshToken
-      }
-    };
-  } catch (error) {
-    console.error('Lỗi đăng nhập:', error);
-    return {
-      success: false,
-      statusCode: 500,
-      message: 'Lỗi server',
-      error: error.message
-    };
-  }
+  };
 };
 
 // Làm mới token
@@ -289,8 +172,8 @@ export const refreshUserToken = async (refreshTokenData) => {
   }
 
   try {
-    // Tìm user với refresh token này
-    const user = await User.findOne({ where: { refresh_token: refreshToken } });
+    // Tìm user với refresh token này (chuẩn Mongoose)
+    const user = await User.findOne({ refresh_token: refreshToken });
 
     if (!user) {
       return {
@@ -304,8 +187,9 @@ export const refreshUserToken = async (refreshTokenData) => {
     // Kiểm tra xem refresh token đã hết hạn chưa
     if (new Date() > new Date(user.refresh_token_expires)) {
       // Xóa refresh token từ database
-      await user.update({ refresh_token: null, refresh_token_expires: null });
-
+      user.refresh_token = null;
+      user.refresh_token_expires = null;
+      await user.save();
       return {
         success: false,
         statusCode: 401,
@@ -322,10 +206,9 @@ export const refreshUserToken = async (refreshTokenData) => {
     const refreshExpires = new Date(Date.now() + REFRESH_TOKEN_EXPIRATION_MS);
 
     // Cập nhật refresh token mới vào database
-    await user.update({
-      refresh_token: newRefreshToken,
-      refresh_token_expires: refreshExpires
-    });
+    user.refresh_token = newRefreshToken;
+    user.refresh_token_expires = refreshExpires;
+    await user.save();
 
     return {
       success: true,
@@ -360,7 +243,7 @@ export const logoutUser = async (userId) => {
 
   try {
     // Tìm user
-    const user = await User.findOne({ where: { documentId: userId } });
+    const user = await User.findOne({ documentId: userId });
 
     if (!user) {
       return {
@@ -372,12 +255,9 @@ export const logoutUser = async (userId) => {
     }
 
     // Xóa refresh token và cập nhật trạng thái
-    await user.update({
-      refresh_token: null,
-      refresh_token_expires: null,
-      is_online: false,
-      last_active: new Date()
-    });
+    user.refresh_token = null;
+    user.refresh_token_expires = null;
+    await user.save();
 
     return {
       success: true,
