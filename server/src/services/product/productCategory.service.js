@@ -81,7 +81,6 @@ export const getAllCategories = async ({
         // Lấy tags của tất cả product, populate tag_id
         const tags = await ProductTag.find({ product_id: { $in: allProductIds } }).populate('tag_id').lean();
 
-        console.log('ALL VARIANTS:', variants.map(v => ({ _id: v._id, product_id: v.product_id })));
 
         categories = categories.map(cat => ({
             ...cat,
