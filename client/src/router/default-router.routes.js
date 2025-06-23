@@ -65,6 +65,10 @@ export const DefaultRouter = [
     element: <Blog />,
   },
   {
+    path: "/blog/category/:categorySlug",
+    element: <Blog />,
+  },
+  {
     path: "/blog/:id",
     element: <BlogDetail />,
   },

@@ -12,6 +12,8 @@ import Attribute from './attribute.js'
 import Media from './media.js'
 import User from './user.js'
 import Role from './role.js'
+import Blog from './blogPost.js'
+import BlogCategory from './blogCategory.js'
 // ... import các model khác nếu cần
 
 export {
@@ -28,6 +30,8 @@ export {
   Attribute,
   Media,
   User,
-  Role
+  Role,
+  Blog,
+  BlogCategory
   // ... export các model khác nếu cần
 };

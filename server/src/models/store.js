@@ -6,6 +6,7 @@ const storeSchema = new mongoose.Schema({
   phone: { type: String, required: true, maxlength: 20 },
   email: { type: String, default: null, maxlength: 100 },
   image_story: { type: mongoose.Schema.Types.ObjectId, ref: 'Media', required: true },
+  creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
   deleted_at: { type: Date, default: null }
