@@ -12,7 +12,7 @@ const server = http.createServer(app); // 👈 Tạo server từ http
 
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:4001',
+        origin: '*',
         methods: ['GET', 'POST'],
         credentials: true,
     }
@@ -50,7 +50,7 @@ io.on("connection_error", (err) => {
 
 
 app.use(cors({
-    origin: 'http://localhost:4001',
+    origin: '*',
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
