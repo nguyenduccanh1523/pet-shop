@@ -3,6 +3,7 @@ import productCategory from "./product/productCategory.js"
 import productRouter from "./product/product.js"
 import blogCategoryRouter from "./blog/blogCategory.js"
 import blogRouter from "./blog/blog.js"
+import adsRouter from "./page/ads.js"
 
 const initRoutes = (app) => {
   app.use("/api/v1/auth", authRouter);
@@ -10,6 +11,7 @@ const initRoutes = (app) => {
   app.use("/api/v1/product", productRouter);
   app.use("/api/v1/blog-categories", blogCategoryRouter);
   app.use("/api/v1/blogs", blogRouter);
+  app.use("/api/v1/ads", adsRouter);
 
 
 
